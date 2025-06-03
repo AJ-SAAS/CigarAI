@@ -1,0 +1,17 @@
+//
+//  CigarAIApp.swift
+//  CigarAI
+//
+//  Created by Work Laptop on 03/06/2025.
+//
+
+import SwiftUI
+
+@main
+struct CigarAIApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}

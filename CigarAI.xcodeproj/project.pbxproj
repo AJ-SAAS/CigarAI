@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		92F373C12DEE8E0B0032132E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373C02DEE8E0B0032132E /* FirebaseAuth */; };
+		92F373C32DEE8E0B0032132E /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373C22DEE8E0B0032132E /* FirebaseAuthCombine-Community */; };
+		92F373C52DEE8E0B0032132E /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373C42DEE8E0B0032132E /* FirebaseDatabase */; };
+		92F373C72DEE8E0B0032132E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373C62DEE8E0B0032132E /* FirebaseFirestore */; };
+		92F373C92DEE8E0B0032132E /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373C82DEE8E0B0032132E /* FirebaseFunctions */; };
+		92F373CB2DEE8E0B0032132E /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373CA2DEE8E0B0032132E /* FirebaseStorage */; };
+		92F373CD2DEE8E410032132E /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373CC2DEE8E410032132E /* FirebaseCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		92F373A12DEE87480032132E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +62,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92F373C52DEE8E0B0032132E /* FirebaseDatabase in Frameworks */,
+				92F373C72DEE8E0B0032132E /* FirebaseFirestore in Frameworks */,
+				92F373C92DEE8E0B0032132E /* FirebaseFunctions in Frameworks */,
+				92F373C12DEE8E0B0032132E /* FirebaseAuth in Frameworks */,
+				92F373CD2DEE8E410032132E /* FirebaseCore in Frameworks */,
+				92F373C32DEE8E0B0032132E /* FirebaseAuthCombine-Community in Frameworks */,
+				92F373CB2DEE8E0B0032132E /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +129,13 @@
 			);
 			name = CigarAI;
 			packageProductDependencies = (
+				92F373C02DEE8E0B0032132E /* FirebaseAuth */,
+				92F373C22DEE8E0B0032132E /* FirebaseAuthCombine-Community */,
+				92F373C42DEE8E0B0032132E /* FirebaseDatabase */,
+				92F373C62DEE8E0B0032132E /* FirebaseFirestore */,
+				92F373C82DEE8E0B0032132E /* FirebaseFunctions */,
+				92F373CA2DEE8E0B0032132E /* FirebaseStorage */,
+				92F373CC2DEE8E410032132E /* FirebaseCore */,
 			);
 			productName = CigarAI;
 			productReference = 92F373932DEE87450032132E /* CigarAI.app */;
@@ -195,6 +219,9 @@
 			);
 			mainGroup = 92F3738A2DEE87450032132E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 92F373942DEE87450032132E /* Products */;
 			projectDirPath = "";
@@ -322,7 +349,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -380,7 +407,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -403,8 +430,10 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -412,6 +441,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = xyz.cigarai.CigarAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -431,8 +464,10 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -440,6 +475,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = xyz.cigarai.CigarAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -558,6 +597,55 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.13.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		92F373C02DEE8E0B0032132E /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		92F373C22DEE8E0B0032132E /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+		92F373C42DEE8E0B0032132E /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		92F373C62DEE8E0B0032132E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		92F373C82DEE8E0B0032132E /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		92F373CA2DEE8E0B0032132E /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		92F373CC2DEE8E410032132E /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 92F3738B2DEE87450032132E /* Project object */;
 }

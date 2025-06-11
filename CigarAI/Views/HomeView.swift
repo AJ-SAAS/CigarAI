@@ -3,101 +3,99 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var viewModel: CigarViewModel
     @State private var showingLogCigarSheet = false
-    @Binding var selectedTab: Int // Bind to TabView selection
-
+    @Binding var selectedTab: Int
+    
     var body: some View {
         NavigationView {
-            ZStack {
+            GeometryReader { geometry in
                 ScrollView {
-                    VStack(spacing: 16) {
-                        // Dashboard Cards
-                        GeometryReader { geometry in
-                            HStack(spacing: 16) {
-                                DashboardCard(
-                                    icon: "🔥",
-                                    value: "\(viewModel.totalCigarsLogged)",
-                                    label: "Total Cigars Logged",
-                                    width: geometry.size.width / 3 - 16
-                                )
-                                DashboardCard(
-                                    icon: "📅",
-                                    value: viewModel.lastLoggedDate,
-                                    label: "Last Logged",
-                                    width: geometry.size.width / 3 - 16
-                                )
-                                DashboardCard(
-                                    icon: "🌟",
-                                    value: viewModel.flavorProfile.joined(separator: ", "),
-                                    label: "Top Flavors",
-                                    width: geometry.size.width / 3 - 16
-                                )
-                            }
-                            .padding(.horizontal)
-                        }
-                        .frame(height: 120)
-
-                        // Recent Cigars
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Recent Cigars Logged")
-                                .font(.title2)
+                    VStack(spacing: 20) {
+                        // Header Section
+                        VStack(spacing: 8) {
+                            Text("Cigar AI")
+                                .font(.largeTitle)
                                 .fontWeight(.bold)
-                                .padding(.horizontal)
-                            if viewModel.recentCigars.isEmpty {
-                                Text("No recent cigars logged.")
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal)
-                            } else {
-                                ForEach(viewModel.recentCigars) { cigar in
-                                    RecentCigarRow(cigar: cigar)
-                                        .padding(.horizontal)
-                                        .padding(.vertical, 4)
-                                }
-                            }
+                            
+                            Text("Welcome back")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
                         }
-
-                        // Ask the Cigar Concierge Button
-                        Button(action: {
-                            selectedTab = 2 // Switch to ChatbotView tab
-                        }) {
+                        .padding(.top, 20)
+                        
+                        // Dashboard Cards
+                        HStack(spacing: 12) {
+                            DashboardCard(
+                                icon: "🔥",
+                                value: "\(viewModel.totalCigarsLogged)",
+                                label: "Total Logged"
+                            )
+                            
+                            DashboardCard(
+                                icon: "🌟",
+                                value: viewModel.flavorProfile.prefix(2).joined(separator: ", "),
+                                label: "Top Flavors"
+                            )
+                            
+                            DashboardCard(
+                                icon: "📅",
+                                value: viewModel.lastLoggedDate,
+                                label: "Last Smoked"
+                            )
+                        }
+                        .padding(.horizontal)
+                        .frame(height: 120)
+                        
+                        // Concierge Button
+                        Button(action: { selectedTab = 2 }) {
                             HStack {
                                 Image(systemName: "message")
                                 Text("Ask the Cigar Concierge")
-                                    .font(.headline)
                             }
+                            .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.blue)
+                            .background(Color(red: 205/255, green: 133/255, blue: 63/255))
                             .cornerRadius(10)
                         }
                         .padding(.horizontal)
-                        .padding(.bottom)
-                    }
-                }
-
-                // Floating Plus Button
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            showingLogCigarSheet = true
-                        }) {
-                            Image(systemName: "plus")
-                                .font(.title)
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                                .background(Color.orange)
-                                .clipShape(Circle())
-                                .shadow(radius: 4)
+                        
+                        // Recent Cigars Section
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Recent Cigars Logged")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            
+                            if viewModel.recentCigars.isEmpty {
+                                Text("No recent cigars logged.")
+                                    .foregroundColor(.gray)
+                            } else {
+                                ForEach(Array(viewModel.recentCigars.prefix(3)), id: \.id) { cigar in
+                                    RecentCigarRow(cigar: cigar)
+                                }
+                            }
                         }
-                        .padding()
-                        .accessibilityLabel("Log a New Cigar")
-                        .accessibilityHint("Opens the form to log a new cigar")
+                        .padding(.horizontal)
+                        
+                        // Log New Cigar Button
+                        Button(action: { showingLogCigarSheet = true }) {
+                            HStack {
+                                Image(systemName: "plus")
+                                Text("Log a new cigar")
+                            }
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(red: 205/255, green: 133/255, blue: 63/255))
+                            .cornerRadius(10)
+                        }
+                        .padding([.horizontal, .bottom])
                     }
+                    .frame(minHeight: geometry.size.height)
                 }
             }
-            .navigationTitle("Cigar AI")
+            .navigationTitle("")
             .sheet(isPresented: $showingLogCigarSheet) {
                 LogCigarView(viewModel: viewModel)
             }
@@ -109,22 +107,21 @@ struct DashboardCard: View {
     let icon: String
     let value: String
     let label: String
-    let width: CGFloat
-
+    
     var body: some View {
-        VStack {
+        VStack(spacing: 8) {
             Text(icon)
                 .font(.title)
             Text(value)
                 .font(.headline)
                 .lineLimit(2)
-                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.7)
             Text(label)
                 .font(.caption)
                 .foregroundColor(.gray)
         }
-        .frame(width: width)
-        .padding()
+        .frame(maxWidth: .infinity)
+        .padding(10)
         .background(Color(.systemBackground))
         .cornerRadius(10)
         .shadow(radius: 2)
@@ -133,23 +130,50 @@ struct DashboardCard: View {
 
 struct RecentCigarRow: View {
     let cigar: Cigar
-
+    
     var body: some View {
         HStack {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(cigar.name)
                     .font(.headline)
+                HStack(spacing: 2) {
+                    ForEach(0..<Int(cigar.rating), id: \.self) { _ in
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.caption)
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(cigar.date, style: .date)
+                    .font(.caption)
+                    .foregroundColor(.gray)
                 Text(cigar.flavorNotes.joined(separator: ", "))
                     .font(.caption)
                     .foregroundColor(.gray)
+                    .lineLimit(2)
             }
-            Spacer()
-            Text("\(cigar.rating) stars")
-                .font(.caption)
         }
-        .padding()
+        .padding(10)
         .background(Color(.systemBackground))
         .cornerRadius(10)
         .shadow(radius: 2)
+    }
+}
+
+struct HomeView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            HomeView(selectedTab: .constant(0))
+                .environmentObject(CigarViewModel(isPreview: true))
+                .previewDevice("iPhone 14 Pro")
+            
+            HomeView(selectedTab: .constant(0))
+                .environmentObject(CigarViewModel(isPreview: true))
+                .previewDevice("iPad Pro (12.9-inch) (6th generation)")
+        }
     }
 }

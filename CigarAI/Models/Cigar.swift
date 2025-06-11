@@ -9,6 +9,7 @@ struct Cigar: Identifiable, Codable {
     let flavorNotes: [String]
     let rating: Int
     let date: Date
+    var quantity: Int? // Added for inventory tracking, optional
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -18,5 +19,6 @@ struct Cigar: Identifiable, Codable {
         case flavorNotes = "flavor_notes"
         case rating
         case date
+        case quantity // Added for encoding/decoding
     }
 }

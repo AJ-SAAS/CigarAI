@@ -38,7 +38,7 @@ struct SettingsView: View {
                             .font(.system(.body, design: .default, weight: .regular))
                             .padding(.vertical, 4)
                             .accessibilityLabel("Contact Support via Email")
-                        Link("Visit Our Website", destination: URL(string: "https://www.cigarai.com")!)
+                        Link("Visit Our Website", destination: URL(string: "https://www.cigar-ai.app")!)
                             .font(.system(.body, design: .default, weight: .regular))
                             .padding(.vertical, 4)
                             .accessibilityLabel("Visit Website")
@@ -48,11 +48,11 @@ struct SettingsView: View {
                     // Legal Section
                     Section(header: Text("Legal")
                                 .font(.system(.headline, design: .default, weight: .bold))) {
-                        Link("Terms of Use", destination: URL(string: "https://www.cigarai.com/terms")!)
+                        Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
                             .font(.system(.body, design: .default, weight: .regular))
                             .padding(.vertical, 4)
                             .accessibilityLabel("Terms of Use")
-                        Link("Privacy Policy", destination: URL(string: "https://www.cigarai.com/privacy")!)
+                        Link("Privacy Policy", destination: URL(string: "https://www.cigar-ai.app/r/privacy")!)
                             .font(.system(.body, design: .default, weight: .regular))
                             .padding(.vertical, 4)
                             .accessibilityLabel("Privacy Policy")

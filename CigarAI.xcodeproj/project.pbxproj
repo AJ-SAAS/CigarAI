@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		92A1CAD52DF9732000874F4B /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 92A1CAD42DF9732000874F4B /* DGCharts */; };
 		92F373C12DEE8E0B0032132E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373C02DEE8E0B0032132E /* FirebaseAuth */; };
 		92F373C32DEE8E0B0032132E /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373C22DEE8E0B0032132E /* FirebaseAuthCombine-Community */; };
 		92F373C52DEE8E0B0032132E /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 92F373C42DEE8E0B0032132E /* FirebaseDatabase */; };
@@ -62,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92A1CAD52DF9732000874F4B /* DGCharts in Frameworks */,
 				92F373C52DEE8E0B0032132E /* FirebaseDatabase in Frameworks */,
 				92F373C72DEE8E0B0032132E /* FirebaseFirestore in Frameworks */,
 				92F373C92DEE8E0B0032132E /* FirebaseFunctions in Frameworks */,
@@ -136,6 +138,7 @@
 				92F373C82DEE8E0B0032132E /* FirebaseFunctions */,
 				92F373CA2DEE8E0B0032132E /* FirebaseStorage */,
 				92F373CC2DEE8E410032132E /* FirebaseCore */,
+				92A1CAD42DF9732000874F4B /* DGCharts */,
 			);
 			productName = CigarAI;
 			productReference = 92F373932DEE87450032132E /* CigarAI.app */;
@@ -221,6 +224,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				92A1CAD32DF9732000874F4B /* XCRemoteSwiftPackageReference "Charts" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 92F373942DEE87450032132E /* Products */;
@@ -599,6 +603,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		92A1CAD32DF9732000874F4B /* XCRemoteSwiftPackageReference "Charts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielgindi/Charts.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
 		92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
@@ -610,6 +622,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		92A1CAD42DF9732000874F4B /* DGCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92A1CAD32DF9732000874F4B /* XCRemoteSwiftPackageReference "Charts" */;
+			productName = DGCharts;
+		};
 		92F373C02DEE8E0B0032132E /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 92F373BF2DEE8E0B0032132E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

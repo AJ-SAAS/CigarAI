@@ -17,6 +17,7 @@ struct RadarChartView: View {
             RadarGrid(numberOfAxes: numberOfAxes, maxRadius: maxRadius)
                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
 
+            // Fill the area with light brown
             Path { path in
                 let center = CGPoint(x: maxRadius, y: maxRadius)
                 for (index, item) in data.enumerated() {
@@ -34,21 +35,40 @@ struct RadarChartView: View {
                 }
                 path.closeSubpath()
             }
-            .stroke(Color.blue, lineWidth: 2)
-            .background(
-                Path { path in
-                    let center = CGPoint(x: maxRadius, y: maxRadius)
-                    for (index, item) in data.enumerated() {
-                        let angle = 2 * .pi * Double(index) / Double(numberOfAxes)
-                        let radius = maxRadius * (item.intensity / 100)
-                        let x = center.x + radius * cos(CGFloat(angle))
-                        let y = center.y - radius * sin(CGFloat(angle))
-                        let point = CGPoint(x: x, y: y)
-                        path.addEllipse(in: CGRect(x: point.x - 2, y: point.y - 2, width: 4, height: 4))
+            .fill(Color(red: 205/255, green: 133/255, blue: 63/255).opacity(0.3)) // Light brown fill
+
+            // Stroke the same area with dark brown
+            Path { path in
+                let center = CGPoint(x: maxRadius, y: maxRadius)
+                for (index, item) in data.enumerated() {
+                    let angle = 2 * .pi * Double(index) / Double(numberOfAxes)
+                    let radius = maxRadius * (item.intensity / 100)
+                    let x = center.x + radius * cos(CGFloat(angle))
+                    let y = center.y - radius * sin(CGFloat(angle))
+                    let point = CGPoint(x: x, y: y)
+
+                    if index == 0 {
+                        path.move(to: point)
+                    } else {
+                        path.addLine(to: point)
                     }
                 }
-                .fill(Color.blue)
-            )
+                path.closeSubpath()
+            }
+            .stroke(Color(red: 101/255, green: 67/255, blue: 33/255), lineWidth: 2) // Dark brown stroke
+
+            // Optional: Draw dots at points (you can remove this if you don’t want them)
+            Path { path in
+                let center = CGPoint(x: maxRadius, y: maxRadius)
+                for (index, item) in data.enumerated() {
+                    let angle = 2 * .pi * Double(index) / Double(numberOfAxes)
+                    let radius = maxRadius * (item.intensity / 100)
+                    let x = center.x + radius * cos(CGFloat(angle))
+                    let y = center.y - radius * sin(CGFloat(angle))
+                    path.addEllipse(in: CGRect(x: x - 2, y: y - 2, width: 4, height: 4))
+                }
+            }
+            .fill(Color(red: 101/255, green: 67/255, blue: 33/255)) // Match dot color to stroke
 
             // Flavor labels
             ForEach(data.indices, id: \.self) { index in

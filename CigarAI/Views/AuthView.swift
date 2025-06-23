@@ -1,8 +1,9 @@
 import SwiftUI
 import FirebaseAuth
+import RevenueCat
 
 struct AuthView: View {
-    @State private var name: String = ""
+    @EnvironmentObject var viewModel: CigarViewModel
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
@@ -11,245 +12,224 @@ struct AuthView: View {
     @State private var isLoading: Bool = false
     @State private var showingResetPassword: Bool = false
     @State private var resetEmail: String = ""
-    @State private var isVisible = false
-    @Binding var isAuthenticated: Bool
+    @State private var isVisible: Bool = false
+    var onAuthComplete: (Bool) -> Void
 
     var body: some View {
         GeometryReader { geometry in
-            NavigationStack {
-                ScrollView {
-                    VStack(spacing: geometry.size.width > 600 ? 24 : 20) {
-                        ProgressBar(currentStep: 3, totalSteps: 9) // Use the imported ProgressBar
-                            .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                            .padding(.top, geometry.size.width > 600 ? 40 : 24)
-                            .opacity(isVisible ? 1 : 0)
-
-                        Image("CigarAI_logo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: min(geometry.size.width * 0.4, 200))
-                            .opacity(isVisible ? 1 : 0)
-                            .offset(y: isVisible ? 0 : -20)
-                            .accessibilityLabel("Cigar AI Logo")
-
-                        Text(isSignUp ? "Sign Up" : "Sign In")
-                            .font(.system(.title2, design: .default, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                            .opacity(isVisible ? 1 : 0)
-                            .accessibilityLabel(isSignUp ? "Sign Up" : "Sign In")
-
-                        if isSignUp {
-                            TextField("Name (optional)", text: $name)
-                                .textContentType(.name)
-                                .autocapitalization(.words)
-                                .disableAutocorrection(true)
-                                .font(.system(.body, design: .default, weight: .regular))
-                                .padding()
-                                .background(.gray.opacity(0.1))
-                                .cornerRadius(10)
-                                .frame(maxWidth: min(geometry.size.width * 0.9, 600))
-                                .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                                .opacity(isVisible ? 1 : 0)
-                                .accessibilityLabel("Name")
-                                .accessibilityHint("Enter your name, optional")
-                        }
-
-                        TextField("Email", text: $email)
-                            .textContentType(.emailAddress)
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
-                            .font(.system(.body, design: .default, weight: .regular))
-                            .padding()
-                            .background(.gray.opacity(0.1))
-                            .cornerRadius(10)
-                            .frame(maxWidth: min(geometry.size.width * 0.9, 600))
-                            .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                            .opacity(isVisible ? 1 : 0)
-                            .accessibilityLabel("Email")
-
-                        SecureField("Password", text: $password)
-                            .textContentType(isSignUp ? .newPassword : .password)
-                            .disableAutocorrection(true)
-                            .font(.system(.body, design: .default, weight: .regular))
-                            .padding()
-                            .background(.gray.opacity(0.1))
-                            .cornerRadius(10)
-                            .frame(maxWidth: min(geometry.size.width * 0.9, 600))
-                            .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                            .opacity(isVisible ? 1 : 0)
-                            .accessibilityLabel("Password")
-
-                        if isSignUp {
-                            SecureField("Confirm Password", text: $confirmPassword)
-                                .textContentType(.newPassword)
-                                .disableAutocorrection(true)
-                                .font(.system(.body, design: .default, weight: .regular))
-                                .padding()
-                                .background(.gray.opacity(0.1))
-                                .cornerRadius(10)
-                                .frame(maxWidth: min(geometry.size.width * 0.9, 600))
-                                .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                                .opacity(isVisible ? 1 : 0)
-                                .accessibilityLabel("Confirm Password")
-                        }
-
-                        if let error = errorMessage {
-                            Text(error)
-                                .font(.system(.subheadline, design: .default, weight: .regular))
-                                .foregroundColor(.red)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                                .opacity(isVisible ? 1 : 0)
-                                .accessibilityLabel("Error: \(error)")
-                        }
-
-                        Button(action: {
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
-                            isLoading = true
-                            errorMessage = nil
-                            if isSignUp {
-                                if password == confirmPassword {
-                                    signUp()
-                                } else {
-                                    errorMessage = "Passwords do not match."
-                                    isLoading = false
-                                }
-                            } else {
-                                signIn()
-                            }
-                        }) {
-                            Text(isLoading ? "Processing..." : (isSignUp ? "Sign Up" : "Sign In"))
-                                .font(.system(.headline, design: .default, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: min(geometry.size.width * 0.8, 400))
-                                .padding()
-                                .background(
-                                    email.isEmpty || password.isEmpty || (isSignUp && confirmPassword.isEmpty) || isLoading
-                                        ? .gray
-                                        : Color(red: 0.55, green: 0.27, blue: 0.07)
-                                )
-                                .cornerRadius(10)
-                                .opacity(isVisible ? 1 : 0)
-                                .scaleEffect(isVisible ? 1 : 0.95)
-                        }
-                        .disabled(email.isEmpty || password.isEmpty || (isSignUp && confirmPassword.isEmpty) || isLoading)
-                        .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                        .accessibilityLabel(isSignUp ? "Sign Up" : "Sign In")
-
-                        Button(action: {
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
-                            isSignUp.toggle()
-                            errorMessage = nil
-                            name = ""
-                            email = ""
-                            password = ""
-                            confirmPassword = ""
-                        }) {
-                            Text(isSignUp ? "Already have an account? Sign In" : "Don’t have an account? Sign Up")
-                                .font(.system(.body, design: .default, weight: .regular))
-                                .foregroundColor(.black)
-                        }
-                        .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
+            ScrollView {
+                VStack(spacing: 20) {
+                    Image("CigarAILogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: min(geometry.size.width * 0.4, 200))
                         .opacity(isVisible ? 1 : 0)
-                        .accessibilityLabel(isSignUp ? "Switch to Sign In" : "Switch to Sign Up")
+                        .offset(y: isVisible ? 0 : -20)
+                        .accessibilityLabel("Cigar AI Logo")
 
+                    Text(isSignUp ? "Create Account" : "Welcome Back")
+                        .font(.system(.title2, design: .default, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 32)
+                        .opacity(isVisible ? 1 : 0)
+                        .accessibilityHeading(.h1)
+
+                    if let errorMessage = errorMessage {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                            .padding(.horizontal, 32)
+                            .opacity(isVisible ? 1 : 0)
+                            .accessibilityLabel("Error: \(errorMessage)")
+                    }
+
+                    TextField("Email", text: $email)
+                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .padding()
+                        .background(.gray.opacity(0.1))
+                        .cornerRadius(10)
+                        .frame(maxWidth: min(geometry.size.width * 0.9, 600))
+                        .padding(.horizontal, 32)
+                        .opacity(isVisible ? 1 : 0)
+                        .accessibilityLabel("Email input")
+
+                    SecureField("Password", text: $password)
+                        .textContentType(isSignUp ? .newPassword : .password)
+                        .padding()
+                        .background(.gray.opacity(0.1))
+                        .cornerRadius(10)
+                        .frame(maxWidth: min(geometry.size.width * 0.9, 600))
+                        .padding(.horizontal, 32)
+                        .opacity(isVisible ? 1 : 0)
+                        .accessibilityLabel("Password input")
+
+                    if isSignUp {
+                        SecureField("Confirm Password", text: $confirmPassword)
+                            .textContentType(.newPassword)
+                            .padding()
+                            .background(.gray.opacity(0.1))
+                            .cornerRadius(10)
+                            .frame(maxWidth: min(geometry.size.width * 0.9, 600))
+                            .padding(.horizontal, 32)
+                            .opacity(isVisible ? 1 : 0)
+                            .accessibilityLabel("Confirm password input")
+                    }
+
+                    Button(action: {
+                        errorMessage = nil
+                        if isSignUp {
+                            if let validationError = validateSignUp() {
+                                errorMessage = validationError
+                                return
+                            }
+                            signUp()
+                        } else {
+                            if let validationError = validateSignIn() {
+                                errorMessage = validationError
+                                return
+                            }
+                            signIn()
+                        }
+                    }) {
+                        HStack {
+                            Text(isLoading ? "Processing..." : (isSignUp ? "Sign Up" : "Sign In"))
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                    .tint(.white)
+                            }
+                        }
+                        .frame(maxWidth: min(geometry.size.width * 0.8, 400))
+                        .padding()
+                        .background(isLoading ? .gray : Color.cigarBrown)
+                        .cornerRadius(10)
+                    }
+                    .padding(.horizontal, 32)
+                    .opacity(isVisible ? 1 : 0)
+                    .disabled(isLoading || email.isEmpty || password.isEmpty || (isSignUp && confirmPassword.isEmpty))
+                    .accessibilityLabel(isSignUp ? "Sign Up button" : "Sign In button")
+
+                    if !isSignUp {
                         Button("Forgot Password?") {
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
                             showingResetPassword = true
                         }
                         .font(.system(.body, design: .default, weight: .regular))
                         .foregroundColor(.black)
-                        .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                        .padding(.bottom, geometry.size.width > 600 ? 60 : 40)
+                        .padding(.horizontal, 32)
                         .opacity(isVisible ? 1 : 0)
-                        .accessibilityLabel("Forgot Password")
+                        .accessibilityLabel("Forgot Password button")
                     }
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color(red: 0.55, green: 0.27, blue: 0.07).opacity(0.2), Color.white]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .ignoresSafeArea()
-                    )
-                }
-                .sheet(isPresented: $showingResetPassword) {
-                    VStack(spacing: geometry.size.width > 600 ? 24 : 20) {
-                        Text("Reset Password")
-                            .font(.system(.title2, design: .default, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                            .accessibilityLabel("Reset Password")
 
-                        TextField("Email", text: $resetEmail)
-                            .textContentType(.emailAddress)
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
+                    Button(action: {
+                        withAnimation {
+                            isSignUp.toggle()
+                            errorMessage = nil
+                            email = ""
+                            password = ""
+                            confirmPassword = ""
+                        }
+                    }) {
+                        Text(isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up")
                             .font(.system(.body, design: .default, weight: .regular))
-                            .padding()
-                            .background(.gray.opacity(0.1))
-                            .cornerRadius(10)
-                            .frame(maxWidth: min(geometry.size.width * 0.9, 600))
-                            .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                            .accessibilityLabel("Reset Email")
-
-                        Button(action: {
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
-                            resetPassword()
-                        }) {
-                            Text("Send Reset Email")
-                                .font(.system(.headline, design: .default, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: min(geometry.size.width * 0.8, 400))
-                                .padding()
-                                .background(resetEmail.isEmpty ? .gray : Color(red: 0.55, green: 0.27, blue: 0.07))
-                                .cornerRadius(10)
-                        }
-                        .disabled(resetEmail.isEmpty)
-                        .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                        .accessibilityLabel("Send Reset Email")
-
-                        Button(action: {
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
-                            showingResetPassword = false
-                            resetEmail = ""
-                        }) {
-                            Text("Cancel")
-                                .font(.system(.body, design: .default, weight: .regular))
-                                .foregroundColor(.black)
-                        }
-                        .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                        .padding(.bottom, geometry.size.width > 600 ? 60 : 40)
-                        .accessibilityLabel("Cancel")
+                            .foregroundColor(.black)
                     }
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color(red: 0.55, green: 0.27, blue: 0.07).opacity(0.2), Color.white]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .ignoresSafeArea()
-                    )
+                    .padding(.horizontal, 32)
+                    .opacity(isVisible ? 1 : 0)
+                    .accessibilityLabel(isSignUp ? "Switch to Sign In" : "Switch to Sign Up")
+
+                    Spacer()
                 }
+                .padding(.bottom, 40)
+            }
+            .background(Color.backgroundCream.ignoresSafeArea())
+            .sheet(isPresented: $showingResetPassword) {
+                VStack(spacing: 20) {
+                    Text("Reset Password")
+                        .font(.system(.title2, design: .default, weight: .bold))
+                        .padding(.top, 20)
+                        .accessibilityHeading(.h1)
+
+                    TextField("Enter your email", text: $resetEmail)
+                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .padding()
+                        .background(.gray.opacity(0.1))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                        .accessibilityLabel("Reset email input")
+
+                    Button("Send Reset Email") {
+                        if validateEmail(resetEmail) {
+                            resetPassword()
+                        } else {
+                            errorMessage = "Please enter a valid email address."
+                            showingResetPassword = false
+                        }
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.cigarBrown)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                    .disabled(resetEmail.isEmpty)
+                    .accessibilityLabel("Send Reset Email button")
+
+                    Button("Cancel") {
+                        showingResetPassword = false
+                        resetEmail = ""
+                    }
+                    .foregroundColor(.black)
+                    .padding(.bottom, 20)
+                    .accessibilityLabel("Cancel button")
+
+                    Spacer()
+                }
+                .background(Color.backgroundCream.ignoresSafeArea())
             }
             .onAppear {
                 withAnimation(.easeInOut(duration: 1.0)) {
                     isVisible = true
                 }
+                print("AuthView: Appeared")
             }
         }
+    }
+
+    private func validateSignUp() -> String? {
+        if !validateEmail(email) {
+            return "Please enter a valid email address."
+        }
+        if password.count < 6 {
+            return "Password must be at least 6 characters long."
+        }
+        if password != confirmPassword {
+            return "Passwords do not match."
+        }
+        return nil
+    }
+
+    private func validateSignIn() -> String? {
+        if !validateEmail(email) {
+            return "Please enter a valid email address."
+        }
+        if password.isEmpty {
+            return "Please enter a password."
+        }
+        return nil
+    }
+
+    private func validateEmail(_ email: String) -> Bool {
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
+        return emailPredicate.evaluate(with: email)
     }
 
     private func signUp() {
@@ -259,16 +239,20 @@ struct AuthView: View {
                 isLoading = false
                 if let error = error {
                     errorMessage = handleAuthError(error)
+                    print("AuthView: Sign-up failed - \(error.localizedDescription)")
                 } else if let user = result?.user {
-                    if !name.isEmpty {
-                        let changeRequest = user.createProfileChangeRequest()
-                        changeRequest.displayName = name
-                        changeRequest.commitChanges { _ in
-                            // Handle error if needed, but proceed regardless
+                    viewModel.isNewUser = true
+                    viewModel.hasCompletedOnboarding = false
+                    viewModel.saveUserPreferences()
+                    Purchases.shared.logIn(user.uid) { customerInfo, created, error in
+                        if let error = error {
+                            print("AuthView: RevenueCat login failed - \(error.localizedDescription)")
+                        } else {
+                            print("AuthView: RevenueCat logged in user: \(user.uid), created: \(created)")
                         }
                     }
-                    print("Signed up user: \(user.uid), email: \(user.email ?? "unknown"), name: \(name.isEmpty ? "none" : name)")
-                    isAuthenticated = true
+                    onAuthComplete(true)
+                    print("AuthView: Sign-up succeeded, user: \(user.uid)")
                 }
             }
         }
@@ -281,9 +265,18 @@ struct AuthView: View {
                 isLoading = false
                 if let error = error {
                     errorMessage = handleAuthError(error)
+                    print("AuthView: Sign-in failed - \(error.localizedDescription)")
                 } else if let user = result?.user {
-                    print("Signed in user: \(user.uid), email: \(user.email ?? "unknown")")
-                    isAuthenticated = true
+                    viewModel.fetchUserPreferences()
+                    Purchases.shared.logIn(user.uid) { customerInfo, created, error in
+                        if let error = error {
+                            print("AuthView: RevenueCat login failed - \(error.localizedDescription)")
+                        } else {
+                            print("AuthView: RevenueCat logged in user: \(user.uid), created: \(created)")
+                        }
+                    }
+                    onAuthComplete(false)
+                    print("AuthView: Sign-in succeeded, user: \(user.uid)")
                 }
             }
         }
@@ -295,8 +288,10 @@ struct AuthView: View {
                 showingResetPassword = false
                 if let error = error {
                     errorMessage = handleAuthError(error)
+                    print("AuthView: Password reset failed - \(error.localizedDescription)")
                 } else {
                     errorMessage = "Password reset email sent successfully."
+                    print("AuthView: Password reset email sent")
                 }
                 resetEmail = ""
             }
@@ -307,7 +302,7 @@ struct AuthView: View {
         let nsError = error as NSError
         switch nsError.code {
         case AuthErrorCode.emailAlreadyInUse.rawValue:
-            return "Email already exists."
+            return "This email is already in use."
         case AuthErrorCode.invalidEmail.rawValue:
             return "Invalid email address."
         case AuthErrorCode.wrongPassword.rawValue:
@@ -326,13 +321,10 @@ struct AuthView: View {
 
 struct AuthView_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            AuthView(isAuthenticated: .constant(false))
-                .previewDevice(PreviewDevice(rawValue: "iPhone 14"))
-                .previewDisplayName("iPhone 14 Preview")
-            AuthView(isAuthenticated: .constant(false))
-                .previewDevice(PreviewDevice(rawValue: "iPad Pro (12.9-inch) (6th generation)"))
-                .previewDisplayName("iPad Pro Preview")
-        }
+        AuthView(onAuthComplete: { _ in })
+            .environmentObject(CigarViewModel(isPreview: true))
+            .previewDevice(PreviewDevice(rawValue: "iPhone 14"))
+            .previewDisplayName("iPhone 14")
     }
 }
+

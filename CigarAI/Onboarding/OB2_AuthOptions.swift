@@ -6,13 +6,8 @@ struct OB2_AuthOptions: View {
 
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: geometry.size.width > 600 ? 24 : 16) {
-                ProgressBar(currentStep: 2, totalSteps: 9)
-                    .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                    .padding(.top, geometry.size.width > 600 ? 40 : 24)
-                    .opacity(isVisible ? 1 : 0)
-
-                Image("CigarAI_logo")
+            VStack(spacing: 20) {
+                Image("Cicon")
                     .resizable()
                     .scaledToFit()
                     .frame(width: min(geometry.size.width * 0.4, 280))
@@ -20,56 +15,50 @@ struct OB2_AuthOptions: View {
                     .offset(y: isVisible ? 0 : -20)
                     .accessibilityLabel("Cigar AI Logo")
 
-                Image("cigar_mockup")
+                Image("cmockup1")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: min(geometry.size.width * 0.9, 400))
                     .opacity(isVisible ? 1 : 0)
                     .offset(y: isVisible ? 0 : -20)
-                    .accessibilityLabel("Cigar AI App Mockup")
+                    .accessibilityLabel("Cigar mockup illustration")
 
-                Text("Sign in to unlock all features")
+                Text("Sign in to access all of Cigar AI's features")
                     .font(.system(.title2, design: .default, weight: .bold))
                     .multilineTextAlignment(.center)
                     .foregroundColor(.black)
-                    .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
+                    .padding(.horizontal, 32)
                     .opacity(isVisible ? 1 : 0)
-                    .accessibilityLabel("Sign in to unlock all features")
+                    .accessibilityAddTraits(.isHeader)
 
                 Spacer()
 
                 Button(action: {
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     onNext()
+                    print("OB2_AuthOptions: Continue with Email tapped")
                 }) {
                     Text("Continue with Email")
                         .font(.system(.headline, design: .default, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: min(geometry.size.width * 0.8, 400))
                         .padding()
-                        .background(Color(red: 0.55, green: 0.27, blue: 0.07))
+                        .background(Color.cigarBrown)
                         .cornerRadius(10)
                         .opacity(isVisible ? 1 : 0)
                         .scaleEffect(isVisible ? 1 : 0.95)
                 }
-                .padding(.horizontal, geometry.size.width > 600 ? 64 : 32)
-                .padding(.bottom, geometry.size.width > 600 ? 60 : 40)
-                .accessibilityLabel("Continue with Email")
+                .padding(.bottom, 40)
+                .accessibilityLabel("Continue with Email button")
             }
             .frame(maxWidth: .infinity)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [Color(red: 0.55, green: 0.27, blue: 0.07).opacity(0.2), Color.white]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-            )
+            .background(Color.backgroundCream.ignoresSafeArea())
+            .navigationBarBackButtonHidden(true)
             .onAppear {
                 withAnimation(.easeInOut(duration: 1.0)) {
                     isVisible = true
                 }
+                print("OB2_AuthOptions: Appeared")
             }
         }
     }
@@ -77,13 +66,9 @@ struct OB2_AuthOptions: View {
 
 struct OB2_AuthOptions_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            OB2_AuthOptions(onNext: {})
-                .previewDevice(PreviewDevice(rawValue: "iPhone 14"))
-                .previewDisplayName("iPhone 14")
-            OB2_AuthOptions(onNext: {})
-                .previewDevice(PreviewDevice(rawValue: "iPad Pro (12.9-inch) (6th generation)"))
-                .previewDisplayName("iPad Pro")
-        }
+        OB2_AuthOptions(onNext: {})
+            .previewDevice(PreviewDevice(rawValue: "iPhone 14"))
+            .previewDisplayName("iPhone 14")
     }
 }
+

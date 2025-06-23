@@ -1,4 +1,5 @@
 import SwiftUI
+import RevenueCatUI
 
 struct LogCigarView: View {
     @Environment(\.dismiss) var dismiss
@@ -10,6 +11,7 @@ struct LogCigarView: View {
     @State private var cigarType = "Robusto"
     @State private var wrapperType = "Connecticut"
     @State private var strength = "Medium"
+    @State private var showingPaywall = false
 
     private let flavorTags = [
         "Woody", "Creamy", "Spicy", "Earthy",
@@ -21,47 +23,61 @@ struct LogCigarView: View {
     private let wrapperTypeOptions = ["Connecticut", "Habano", "Maduro", "Corojo", "Sumatra", "Cameroon", "Candela", "Broadleaf"]
     private let strengthOptions = ["Mild", "Medium", "Full"]
 
+    private var cigarCountColor: Color {
+        viewModel.totalCigarsLogged >= 5 && !viewModel.isSubscribed ? .red : .black
+    }
+
     var body: some View {
         NavigationView {
             GeometryReader { geo in
                 ScrollView {
                     VStack(spacing: 20) {
-                        Text("Log a New Cigar")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .padding(.top, 20)
-
-                        Image("CigarImage")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 60)
+                        // Cigar Count
+                        Text("Cigars Logged: \(viewModel.totalCigarsLogged)/5")
+                            .font(.system(size: 14, weight: .regular, design: .default))
+                            .foregroundColor(cigarCountColor)
                             .padding(.horizontal)
+                            .accessibilityLabel("Cigars logged: \(viewModel.totalCigarsLogged) out of 5")
 
-                        TextField("E.g. Cohiba Robusto", text: $cigarName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
+                        // Cigar Name
+                        VStack(alignment: .leading) {
+                            Text("Name")
+                                .font(.system(size: 14, weight: .regular, design: .default))
+                                .padding(.horizontal)
+                            TextField("E.g. Cohiba Robusto", text: $cigarName)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .padding(.horizontal)
+                        }
 
+                        // Date
                         DatePicker("Date", selection: $date, in: ...Date(), displayedComponents: [.date])
                             .datePickerStyle(.compact)
+                            .font(.system(size: 14, weight: .regular, design: .default))
                             .padding(.horizontal)
 
                         // Star Rating
-                        HStack {
-                            ForEach(1...5, id: \.self) { index in
-                                Image(systemName: index <= rating ? "star.fill" : "star")
-                                    .foregroundColor(.yellow)
-                                    .font(.system(size: 24))
-                                    .onTapGesture {
-                                        rating = index
-                                    }
-                            }
-                        }
-                        .padding(.horizontal)
-
-                        // Flavor Tags in Grid
                         VStack(alignment: .leading) {
-                            Text("Flavors")
-                                .font(.headline)
+                            Text("Rating")
+                                .font(.system(size: 14, weight: .regular, design: .default))
+                                .padding(.horizontal)
+                            HStack {
+                                ForEach(1...5, id: \.self) { index in
+                                    Image(systemName: index <= rating ? "star.fill" : "star")
+                                        .foregroundColor(index <= rating ? Color(hex: "#5c3b26") : Color(hex: "#f1d8be"))
+                                        .font(.system(size: 28))
+                                        .onTapGesture {
+                                            rating = index
+                                        }
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                        }
+
+                        // Flavor Notes in Grid
+                        VStack(alignment: .leading) {
+                            Text("Flavor Notes")
+                                .font(.system(size: 14, weight: .regular, design: .default))
                                 .padding(.horizontal)
 
                             LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4), spacing: 10) {
@@ -74,10 +90,10 @@ struct LogCigarView: View {
                                         }
                                     }) {
                                         Text(flavor)
-                                            .font(.subheadline)
+                                            .font(.system(.callout, design: .default))
                                             .padding(.vertical, 6)
                                             .padding(.horizontal, 10)
-                                            .background(selectedFlavors.contains(flavor) ? Color.orange.opacity(0.2) : Color.gray.opacity(0.1))
+                                            .background(selectedFlavors.contains(flavor) ? Color.orange.opacity(0.2) : Color(hex: "#fef3e6"))
                                             .cornerRadius(8)
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 8)
@@ -90,10 +106,11 @@ struct LogCigarView: View {
                             .padding(.horizontal)
                         }
 
-                        // Cigar Type & Wrapper Type (MenuPickers)
+                        // Cigar Type & Wrapper Type
                         VStack(spacing: 12) {
                             HStack {
-                                Text("Cigar Type")
+                                Text("Type")
+                                    .font(.system(size: 14, weight: .regular, design: .default))
                                 Spacer()
                                 Menu {
                                     ForEach(cigarTypeOptions, id: \.self) { option in
@@ -109,6 +126,7 @@ struct LogCigarView: View {
 
                             HStack {
                                 Text("Wrapper Type")
+                                    .font(.system(size: 14, weight: .regular, design: .default))
                                 Spacer()
                                 Menu {
                                     ForEach(wrapperTypeOptions, id: \.self) { option in
@@ -127,21 +145,25 @@ struct LogCigarView: View {
                         // Strength Segmented Control
                         VStack(alignment: .leading) {
                             Text("Strength")
+                                .font(.system(size: 14, weight: .regular, design: .default))
                             Picker("Strength", selection: $strength) {
                                 ForEach(strengthOptions, id: \.self) { Text($0) }
                             }
                             .pickerStyle(SegmentedPickerStyle())
+                            .tint(Color(hex: "#5c3b26"))
+                            .background(Color(hex: "#f1d8be"))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                         .padding(.horizontal)
 
                         // Save Button
                         Button(action: { saveCigar() }) {
-                            Text("Save Cigar")
+                            Text("Save Log")
                                 .font(.headline)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(cigarName.isEmpty || selectedFlavors.isEmpty ? Color.gray : Color.orange)
+                                .background(cigarName.isEmpty || selectedFlavors.isEmpty ? Color.gray : Color(hex: "#a8552b"))
                                 .cornerRadius(10)
                         }
                         .disabled(cigarName.isEmpty || selectedFlavors.isEmpty)
@@ -152,13 +174,18 @@ struct LogCigarView: View {
                     .frame(minHeight: geo.size.height)
                 }
             }
-            .navigationTitle("Log Cigar")
+            .navigationTitle("Log a New Stick")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
             }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView()
+                    .environmentObject(viewModel)
+            }
+            .background(Color(hex: "#fefbf3"))
         }
     }
 
@@ -170,23 +197,28 @@ struct LogCigarView: View {
             cigarBody: strength,
             flavorNotes: Array(selectedFlavors),
             rating: rating,
-            date: date
+            date: date,
+            quantity: nil
         )
-        print("Saved cigar: \(cigar.name), \(cigar.rating) stars, flavors: \(cigar.flavorNotes)")
-        viewModel.addCigar(cigar)
-        dismiss()
+        if viewModel.addCigar(cigar) {
+            print("Saved stick: \(cigar.name), \(cigar.rating) stars, flavors: \(cigar.flavorNotes)")
+            dismiss()
+        } else {
+            print("Free tier limit reached, showing paywall")
+            showingPaywall = true
+        }
     }
 }
 
-// MARK: - Previews
 struct LogCigarView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             LogCigarView(viewModel: CigarViewModel(isPreview: true))
                 .previewDevice("iPhone 14 Pro")
-
             LogCigarView(viewModel: CigarViewModel(isPreview: true))
                 .previewDevice("iPad Pro (12.9-inch) (6th generation)")
         }
     }
 }
+
+

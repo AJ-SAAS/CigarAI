@@ -1,28 +1,33 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct HomeView: View {
     @EnvironmentObject var viewModel: CigarViewModel
     @State private var showingLogCigarSheet = false
     @Binding var selectedTab: Int
     
+    private var topFlavors: String {
+        let allFlavors = viewModel.cigars.flatMap { $0.flavorNotes }
+        let flavorCounts = allFlavors.reduce(into: [:]) { counts, flavor in
+            counts[flavor, default: 0] += 1
+        }
+        let sortedFlavors = flavorCounts.sorted { $0.value > $1.value || ($0.value == $1.value && $0.key < $1.key) }
+        return sortedFlavors.prefix(2).map { $0.key }.joined(separator: ", ")
+    }
+    
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Header Section
-                        VStack(spacing: 8) {
-                            Text("Cigar AI")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                            
-                            Text("Welcome back")
-                                .font(.subheadline)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Welcome")
+                                .font(.system(size: 14, weight: .regular, design: .default))
                                 .foregroundColor(.gray)
+                                .padding(.horizontal)
                         }
-                        .padding(.top, 20)
+                        .padding(.top, 8)
                         
-                        // Dashboard Cards
                         HStack(spacing: 12) {
                             DashboardCard(
                                 icon: "🔥",
@@ -32,43 +37,58 @@ struct HomeView: View {
                             
                             DashboardCard(
                                 icon: "🌟",
-                                value: viewModel.flavorProfile.prefix(2).joined(separator: ", "),
+                                value: topFlavors.isEmpty ? "None" : topFlavors,
                                 label: "Top Flavors"
                             )
                             
                             DashboardCard(
                                 icon: "📅",
                                 value: viewModel.lastLoggedDate,
-                                label: "Last Smoked"
+                                label: "Last entry"
                             )
                         }
                         .padding(.horizontal)
                         .frame(height: 120)
                         
-                        // Concierge Button
-                        Button(action: { selectedTab = 2 }) {
+                        NavigationLink(destination: HumidorView()) {
                             HStack {
-                                Image(systemName: "message")
-                                Text("Ask the Cigar Concierge")
+                                Image(systemName: "archivebox")
+                                Text("My Collection")
                             }
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color(red: 205/255, green: 133/255, blue: 63/255))
+                            .background(Color(hex: "#1B4F26"))
                             .cornerRadius(10)
                         }
                         .padding(.horizontal)
                         
-                        // Recent Cigars Section
+                        Button(action: { selectedTab = 2 }) {
+                            HStack {
+                                Image(systemName: "message")
+                                Text("Ask the Concierge")
+                            }
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.black)
+                            .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                        
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Recent Cigars Logged")
+                            Text("Recently Logged")
                                 .font(.title2)
                                 .fontWeight(.bold)
+                                .padding(.horizontal)
                             
                             if viewModel.recentCigars.isEmpty {
-                                Text("No recent cigars logged.")
+                                Text("No recent logs.")
+                                    .font(.system(size: 12, weight: .regular, design: .default))
                                     .foregroundColor(.gray)
+                                    .padding(.horizontal)
                             } else {
                                 ForEach(Array(viewModel.recentCigars.prefix(3)), id: \.id) { cigar in
                                     RecentCigarRow(cigar: cigar)
@@ -77,28 +97,37 @@ struct HomeView: View {
                         }
                         .padding(.horizontal)
                         
-                        // Log New Cigar Button
                         Button(action: { showingLogCigarSheet = true }) {
                             HStack {
                                 Image(systemName: "plus")
-                                Text("Log a new cigar")
+                                Text("Log a new stick")
                             }
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color(red: 205/255, green: 133/255, blue: 63/255))
+                            .background(Color(hex: "#a8552b"))
                             .cornerRadius(10)
                         }
-                        .padding([.horizontal, .bottom])
+                        .padding(.horizontal)
+                        .padding(.bottom)
                     }
-                    .frame(minHeight: geometry.size.height)
+                }
+                .navigationTitle("Home")
+                .navigationBarTitleDisplayMode(.inline)
+                .font(.title2)
+                .fontWeight(.regular)
+                .padding(.vertical, 20)
+                .frame(maxWidth: .infinity)
+                .background(Color(hex: "#fefbf3").ignoresSafeArea())
+                .onAppear {
+                    print("HomeView: onAppear triggered, fetching cigars")
+                    viewModel.fetchCigars()
                 }
             }
-            .navigationTitle("")
-            .sheet(isPresented: $showingLogCigarSheet) {
-                LogCigarView(viewModel: viewModel)
-            }
+        }
+        .sheet(isPresented: $showingLogCigarSheet) {
+            LogCigarView(viewModel: viewModel)
         }
     }
 }
@@ -113,11 +142,11 @@ struct DashboardCard: View {
             Text(icon)
                 .font(.title)
             Text(value)
-                .font(.headline)
+                .font(.system(size: 12, weight: .regular, design: .default))
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
             Text(label)
-                .font(.caption)
+                .font(.system(size: 12, weight: .regular, design: .default))
                 .foregroundColor(.gray)
         }
         .frame(maxWidth: .infinity)
@@ -135,12 +164,12 @@ struct RecentCigarRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(cigar.name)
-                    .font(.headline)
+                    .font(.system(size: 12, weight: .regular, design: .default))
                 HStack(spacing: 2) {
-                    ForEach(0..<Int(cigar.rating), id: \.self) { _ in
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.yellow)
-                            .font(.caption)
+                    ForEach(1...5, id: \.self) { index in
+                        Image(systemName: index <= cigar.rating ? "star.fill" : "star")
+                            .foregroundColor(index <= cigar.rating ? Color(hex: "#5c3b26") : Color(hex: "#f1d8be"))
+                            .font(.system(size: 12))
                     }
                 }
             }
@@ -149,10 +178,10 @@ struct RecentCigarRow: View {
             
             VStack(alignment: .trailing, spacing: 4) {
                 Text(cigar.date, style: .date)
-                    .font(.caption)
+                    .font(.system(size: 12, weight: .regular, design: .default))
                     .foregroundColor(.gray)
                 Text(cigar.flavorNotes.joined(separator: ", "))
-                    .font(.caption)
+                    .font(.system(size: 12, weight: .regular, design: .default))
                     .foregroundColor(.gray)
                     .lineLimit(2)
             }
@@ -177,3 +206,4 @@ struct HomeView_Previews: PreviewProvider {
         }
     }
 }
+

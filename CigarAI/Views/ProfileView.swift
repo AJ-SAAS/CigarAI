@@ -44,33 +44,23 @@ struct ProfileView: View {
         }
     }
 
-    private var topCigarsByCount: [(name: String, count: Int)] {
-        Dictionary(grouping: viewModel.cigars, by: { $0.name })
-            .map { (name: $0.key, count: $0.value.count) }
-            .sorted { $0.count > $1.count }
-            .prefix(3)
-            .map { $0 }
-    }
-
-    private var topCigarsByRating: [(name: String, rating: Int)] {
-        Dictionary(grouping: viewModel.cigars, by: { $0.name })
-            .map { (name: $0.key, rating: $0.value.map { $0.rating }.max() ?? 0) }
+    private var topCigarsByRating: [(name: String, rating: Double)] {
+        let groupedCigars = Dictionary(grouping: viewModel.cigars, by: { $0.name })
+        let cigarsWithRatings = groupedCigars.map { (name, cigars) in
+            let totalRating = cigars.map { Double($0.rating) }.reduce(0.0, +)
+            let averageRating = totalRating / Double(cigars.count)
+            return (name: name, rating: averageRating)
+        }
+        return cigarsWithRatings
             .sorted { $0.rating > $1.rating }
             .prefix(3)
             .map { $0 }
     }
 
     private var favoriteThisMonth: Cigar? {
-        let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date())!
+        let oneMonthAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
         return viewModel.cigars
             .filter { $0.date >= oneMonthAgo }
-            .max(by: { $0.rating < $1.rating })
-    }
-
-    private var favoriteThisWeek: Cigar? {
-        let oneWeekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-        return viewModel.cigars
-            .filter { $0.date >= oneWeekAgo }
             .max(by: { $0.rating < $1.rating })
     }
 
@@ -79,11 +69,7 @@ struct ProfileView: View {
             GeometryReader { geometry in
                 ScrollView {
                     VStack(spacing: geometry.size.width > 600 ? 24 : 16) {
-                        Text("Flavor Profile Summary")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .padding(.top, geometry.size.width > 600 ? 30 : 20)
-
+                        // Your Palate Section
                         VStack(alignment: .center, spacing: geometry.size.width > 600 ? 8 : 4) {
                             Text("Your Palate")
                                 .font(.title2)
@@ -97,12 +83,14 @@ struct ProfileView: View {
 
                         // Radar Chart for Top 6 Flavors
                         RadarChartView(data: radarData, top6Flavors: top6Flavors)
-                            .frame(height: geometry.size.width > 600 ? 400 : 200)
-                            .padding()
-                            .background(Color(.systemBackground))
-                            .cornerRadius(10)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: geometry.size.width > 600 ? 450 : 300)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(Color(hex: "#fefbf3"))
                             .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
 
+                        // Top 3 Flavors Section
                         Section {
                             Text("Top 3 Flavors You Log Most")
                                 .font(.title2)
@@ -110,7 +98,7 @@ struct ProfileView: View {
                                 .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                            VStack(alignment: .leading, spacing: geometry.size.width > 600 ? 12 : 8) {
+                            VStack(alignment: .center, spacing: geometry.size.width > 600 ? 12 : 8) {
                                 let sortedFlavors = flavorFrequencies.sorted { $0.value > $1.value }
                                     .prefix(3)
                                     .map { ($0.key, $0.value) }
@@ -122,51 +110,49 @@ struct ProfileView: View {
                                         .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
                                 } else {
                                     ForEach(sortedFlavors, id: \.0) { flavor, count in
-                                        HStack(spacing: 0) {
-                                            Text("\(flavor)")
+                                        HStack(spacing: 8) {
+                                            Text(flavor)
                                                 .font(.subheadline)
-                                                .frame(width: geometry.size.width > 600 ? 120 : 80, alignment: .leading)
+                                                .frame(width: geometry.size.width > 600 ? 120 : 80)
                                             GeometryReader { geo in
                                                 ZStack(alignment: .leading) {
                                                     Rectangle()
-                                                        .foregroundColor(Color(red: 101/255, green: 67/255, blue: 33/255))
-                                                        .frame(height: geometry.size.width > 600 ? 24 : 18)
+                                                        .foregroundColor(Color(hex: "#f2d7bc"))
+                                                        .frame(height: geometry.size.width > 600 ? 20.4 : 15.3)
+                                                        .cornerRadius(4)
                                                     Rectangle()
-                                                        .foregroundColor(Color(red: 205/255, green: 133/255, blue: 63/255))
-                                                        .frame(width: geo.size.width * (CGFloat(count) / CGFloat(viewModel.totalCigarsLogged > 0 ? viewModel.totalCigarsLogged : 1)), height: geometry.size.width > 600 ? 24 : 18)
+                                                        .foregroundColor(Color(hex: "#cb652b"))
+                                                        .frame(width: geo.size.width * (CGFloat(count) / CGFloat(viewModel.totalCigarsLogged > 0 ? viewModel.totalCigarsLogged : 1)), height: geometry.size.width > 600 ? 20.4 : 15.3)
+                                                        .cornerRadius(4)
                                                 }
                                             }
-                                            .frame(height: geometry.size.width > 600 ? 24 : 18)
-                                            .padding(.horizontal, geometry.size.width > 600 ? 12 : 8)
+                                            .frame(height: geometry.size.width > 600 ? 20.4 : 15.3)
                                         }
                                         .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
+                                        .frame(maxWidth: .infinity)
                                     }
                                 }
                             }
+                            .frame(maxWidth: .infinity)
                         }
 
-                        // Favorite Cigar This Week
+                        // Top-Rated Cigar This Month
                         Section {
                             VStack(spacing: 4) {
-                                Text("Your favorite cigar this week:")
+                                Text("Top-Rated This Month:")
                                     .font(.title2)
                                     .fontWeight(.regular)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
 
-                                if let favorite = favoriteThisWeek {
-                                    Image("CigarImage")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: geometry.size.width > 600 ? 150 : 100)
-                                        .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
-
+                                if let favorite = favoriteThisMonth {
+                                    
                                     Text(favorite.name)
                                         .font(.title2)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
                                 } else {
-                                    Text("No cigars logged this week.")
+                                    Text("No flavors logged this month.")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -175,73 +161,29 @@ struct ProfileView: View {
                             }
                         }
 
+
                         // Top Cigars
                         Section {
-                            Text("Top Cigars")
-                                .font(.headline)
+                            Text("Highest Rated of All Time")
+                                .font(.title2)
+                                .fontWeight(.regular)
                                 .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
                             VStack(spacing: geometry.size.width > 600 ? 12 : 8) {
-                                if topCigarsByCount.isEmpty && topCigarsByRating.isEmpty {
+                                if topCigarsByRating.isEmpty {
                                     Text("No cigars logged yet.")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
                                         .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
                                 } else {
-                                    if !topCigarsByCount.isEmpty {
-                                        ForEach(topCigarsByCount, id: \.name) { cigar in
-                                            Text("\(cigar.name): \(cigar.count) time\(cigar.count == 1 ? "" : "s")")
-                                                .font(.subheadline)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                        }
-                                    }
-                                    if !topCigarsByRating.isEmpty {
-                                        ForEach(topCigarsByRating, id: \.name) { cigar in
-                                            Text("\(cigar.name): \(cigar.rating) star\(cigar.rating == 1 ? "" : "s")")
-                                                .font(.subheadline)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                        }
-                                    }
-                                    if let favorite = favoriteThisMonth {
-                                        Text("\(favorite.name): \(favorite.rating) stars")
-                                            .font(.subheadline)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                    ForEach(topCigarsByRating, id: \.name) { cigar in
+                                        TopCigarRow(cigar: cigar)
+                                            .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
                                     }
                                 }
                             }
-                        }
-
-                        // Recent Cigars
-                        Section {
-                            Text("Recent Cigars")
-                                .font(.headline)
-                                .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-
-                            if viewModel.recentCigars.isEmpty {
-                                Text("No recent cigars logged.")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            } else {
-                                LazyVGrid(columns: [
-                                    GridItem(.flexible(), spacing: geometry.size.width > 600 ? 24 : 16),
-                                    GridItem(.flexible(), spacing: geometry.size.width > 600 ? 24 : 16)
-                                ], spacing: geometry.size.width > 600 ? 24 : 16) {
-                                    ForEach(viewModel.recentCigars) { cigar in
-                                        RecentCigarCard(cigar: cigar, geometry: geometry)
-                                    }
-                                }
-                                .padding(.horizontal, geometry.size.width > 600 ? 40 : 16)
-                            }
+                            .frame(maxWidth: .infinity)
                         }
 
                         Spacer()
@@ -249,40 +191,52 @@ struct ProfileView: View {
                     .frame(minHeight: geometry.size.height)
                 }
             }
-            .navigationTitle("")
+            .navigationTitle("Flavor Profile Summary")
+            .navigationBarTitleDisplayMode(.inline)
+            .font(.title2)
+            .fontWeight(.bold)
+            .padding(.vertical, 20)
+            .frame(maxWidth: .infinity)
             .toolbar {}
+            .background(Color(hex: "#fefbf3"))
         }
     }
 }
 
-struct RecentCigarCard: View {
-    let cigar: Cigar
-    let geometry: GeometryProxy
-
+struct TopCigarRow: View {
+    let cigar: (name: String, rating: Double)
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: geometry.size.width > 600 ? 12 : 8) {
-            Text(cigar.name)
-                .font(.headline)
-                .lineLimit(2)
-            Text(cigar.date, style: .date)
-                .font(.subheadline)
-                .foregroundColor(.gray)
-            HStack {
-                ForEach(0..<Int(cigar.rating), id: \.self) { _ in
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.yellow)
-                        .font(.caption)
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(cigar.name)
+                    .font(.system(size: 12, weight: .regular, design: .default))
+                HStack(spacing: 2) {
+                    ForEach(0..<Int(cigar.rating.rounded(.up)), id: \.self) { _ in
+                        Image(systemName: "star.fill")
+                            .foregroundColor(Color(hex: "#5c3b26"))
+                            .font(.system(size: 12))
+                    }
                 }
-                Spacer()
-                Text(cigar.flavorNotes.joined(separator: ", "))
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .lineLimit(2)
             }
+            
+            Spacer()
+            
+            Text(String(format: "%.1f", cigar.rating))
+                .font(.system(size: 12, weight: .regular, design: .default))
+                .foregroundColor(.gray)
         }
-        .padding(geometry.size.width > 600 ? 12 : 8)
-        .frame(maxWidth: .infinity)
-        .background(Color(.secondarySystemBackground))
+        .padding(10)
+        .background(Color(.systemBackground))
         .cornerRadius(10)
+        .shadow(radius: 2)
     }
 }
+
+struct ProfileView_Previews: PreviewProvider {
+    static var previews: some View {
+        ProfileView()
+            .environmentObject(CigarViewModel())
+    }
+}
+

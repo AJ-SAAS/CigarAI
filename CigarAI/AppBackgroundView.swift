@@ -1,8 +1,14 @@
-//
-//  AppBackgroundView.swift
-//  CigarAI
-//
-//  Created by Work Laptop on 12/06/2025.
-//
+import SwiftUI
 
-import Foundation
+struct AppBackgroundView<Content: View>: View {
+    let content: () -> Content
+
+    var body: some View {
+        ZStack {
+            Color.appBackground
+                .ignoresSafeArea()
+            content()
+        }
+    }
+}
+
